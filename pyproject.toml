@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "async_fastapi_jwt_auth"
-version = "0.6.3"
+version = "0.6.4"
 description = "Async fork of FastAPI extension that provides JWT Auth support (secure, easy to use and lightweight)"
 authors = ["Yan Khachko <a@slnk.icu>"]
 readme = "README.md"
@@ -21,11 +21,11 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-fastapi = "0.110.0"
-PyJWT = "2.8.0"
+fastapi = ">=0.110.0"
+PyJWT = ">=2.8.0"
 httpx = ">=0.23.3"
-pydantic-settings = "2.0.2"
-cryptography = "42.0.5"
+pydantic-settings = ">=2.2.1"
+cryptography = ">=42.0.5"
 
 [tool.poetry.extras]
 asymmetric = ["cryptography"]

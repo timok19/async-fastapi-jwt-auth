@@ -1,3 +1,24 @@
+## Async fork 0.6.4
+* Dependencies are now use >=, so everything should be fine.
+* Examples for Swagger (OpenAPI) authorization
+
+## Async fork 0.6.3
+*  Dependencies are updated to latest, but somebody (Me) done it wrong, would be fixed in 0.6.4
+
+## Async fork 0.6.2
+* OpenAPI now shows field for auth token. Thx to @SunnyCapt
+```python
+from async_fastapi_jwt_auth.auth_jwt import AuthJWT, AuthJWTBearer
+from fastapi import Depends
+
+auth_dep = AuthJWTBearer()
+
+@app.get("/protected")
+async def protected(Authorize: AuthJWT = Depends(auth_dep)):
+    await Authorize.jwt_required()
+    return {"success": True}
+```
+
 ## Async fork 0.6.1
 * Fix CHANGELOG.md, test action
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from async_fastapi_jwt_auth import AuthJWT
+from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 
 
 class User(BaseModel):
@@ -10,12 +11,13 @@ class User(BaseModel):
 
 
 router = APIRouter()
+auth_dep = AuthJWTBearer()
 
 
 @router.post("/login")
-async def login(user: User, Authorize: AuthJWT = Depends()):
+async def login(user: User, authorize: AuthJWT = Depends(auth_dep)):
     if user.username != "test" or user.password != "test":
         raise HTTPException(status_code=401, detail="Bad username or password")
 
-    access_token = await Authorize.create_access_token(subject=user.username)
+    access_token = await authorize.create_access_token(subject=user.username)
     return {"access_token": access_token}
