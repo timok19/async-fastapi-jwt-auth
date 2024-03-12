@@ -4,8 +4,10 @@ from pydantic import BaseModel
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
+from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 
 app = FastAPI()
+auth_dep = AuthJWTBearer()
 
 
 class User(BaseModel):
@@ -28,14 +30,14 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
 
 
 @app.post("/login")
-async def login(user: User, Authorize: AuthJWT = Depends()):
+async def login(user: User, authorize: AuthJWT = Depends(auth_dep)):
     if user.username != "test" or user.password != "test":
         raise HTTPException(status_code=401, detail="Bad username or password")
 
     # You can be passing custom claim to argument user_claims
     # in function create_access_token() or create refresh token()
     another_claims = {"foo": ["fiz", "baz"]}
-    access_token = await Authorize.create_access_token(
+    access_token = await authorize.create_access_token(
         subject=user.username, user_claims=another_claims
     )
     return {"access_token": access_token}
@@ -44,8 +46,8 @@ async def login(user: User, Authorize: AuthJWT = Depends()):
 # In protected route, get the claims you added to the jwt with the
 # get_raw_jwt() method
 @app.get("/claims")
-async def user(Authorize: AuthJWT = Depends()):
-    await Authorize.jwt_required()
+async def user(authorize: AuthJWT = Depends(auth_dep)):
+    await authorize.jwt_required()
 
-    foo_claims = (await Authorize.get_raw_jwt())["foo"]
+    foo_claims = (await authorize.get_raw_jwt())["foo"]
     return {"foo": foo_claims}
