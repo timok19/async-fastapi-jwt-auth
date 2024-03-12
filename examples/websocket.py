@@ -4,8 +4,10 @@ from pydantic import BaseModel
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
+from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 
 app = FastAPI()
+auth_dep = AuthJWTBearer()
 
 
 class User(BaseModel):
@@ -65,16 +67,17 @@ async def get():
 
 @app.websocket("/ws")
 async def websocket(
-    websocket: WebSocket, token: str = Query(...), Authorize: AuthJWT = Depends()
+    websocket: WebSocket, token: str = Query(...),
+    authorize: AuthJWT = Depends(auth_dep)
 ):
     await websocket.accept()
     try:
-        await Authorize.jwt_required("websocket", token=token)
+        await authorize.jwt_required("websocket", token=token)
         # Authorize.jwt_optional("websocket",token=token)
         # Authorize.jwt_refresh_token_required("websocket",token=token)
         # Authorize.fresh_jwt_required("websocket",token=token)
         await websocket.send_text("Successfully Login!")
-        decoded_token = await Authorize.get_raw_jwt(token)
+        decoded_token = await authorize.get_raw_jwt(token)
         await websocket.send_text(f"Here your decoded token: {decoded_token}")
     except AuthJWTException as err:
         await websocket.send_text(err.message)
@@ -82,12 +85,12 @@ async def websocket(
 
 
 @app.post("/login")
-async def login(user: User, Authorize: AuthJWT = Depends()):
+async def login(user: User, authorize: AuthJWT = Depends(auth_dep)):
     if user.username != "test" or user.password != "test":
         raise HTTPException(status_code=401, detail="Bad username or password")
 
-    access_token = await Authorize.create_access_token(
+    access_token = await authorize.create_access_token(
         subject=user.username, fresh=True
     )
-    refresh_token = await Authorize.create_refresh_token(subject=user.username)
+    refresh_token = await authorize.create_refresh_token(subject=user.username)
     return {"access_token": access_token, "refresh_token": refresh_token}
